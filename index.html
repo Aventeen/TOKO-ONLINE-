@@ -44,6 +44,9 @@
 
     function toggleDarkMode() {
       document.body.classList.toggle('dark');
+      const modeBtn = document.getElementById('modeBtn');
+      const isDark = document.body.classList.contains('dark');
+      modeBtn.innerText = isDark ? 'Mode Terang' : 'Mode Gelap';
     }
 
     function addToCart() {
@@ -119,7 +122,7 @@
     </ul>
     <ul>
       <li><a href="tentang.html">Tentang Kami</a></li>
-      <li><a href="#" role="button" onclick="toggleDarkMode()">Mode Gelap</a></li>
+      <li><a href="#" id="modeBtn" role="button" onclick="toggleDarkMode()">Mode Gelap</a></li>
     </ul>
   </nav>
 

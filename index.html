@@ -6,42 +6,153 @@
   <title>Warkop Ngalor Ngidul</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
   <style>
+    body.dark {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    body.dark nav,
+    body.dark footer,
+    body.dark section,
+    body.dark main {
+      background-color: #1e1e1e;
+    }
     table {
       width: 100%;
     }
-    table td:last-child {
+    td:last-child {
       text-align: right;
+    }
+    #previewTotal {
+      font-weight: bold;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+    }
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.3rem 0;
+    }
+    .cart-item button {
+      margin-left: 1rem;
     }
   </style>
 </head>
 <body>
+  <script>
+    let pesanan = [];
 
-  <!-- NAV -->
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+    }
+
+    function addToCart() {
+      const item = document.getElementById("menuItem").value;
+      const qty = parseInt(document.getElementById("quantity").value);
+      const itemNameMap = {
+        kopi: "Kopi Tubruk",
+        roti: "Roti Bakar",
+        mie: "Mie Goreng",
+        teh: "Es Teh Manis",
+        tempe: "Tempe Goreng",
+        ayam: "Ayam Geprek"
+      };
+      const hargaMap = {
+        kopi: 8000,
+        roti: 12000,
+        mie: 10000,
+        teh: 5000,
+        tempe: 7000,
+        ayam: 18000
+      };
+      if (!item || isNaN(qty) || qty < 1) return;
+      pesanan.push({ item, qty, nama: itemNameMap[item], harga: hargaMap[item] });
+      updateCartPreview();
+    }
+
+    function hapusItem(index) {
+      pesanan.splice(index, 1);
+      updateCartPreview();
+    }
+
+    function updateCartPreview() {
+      const container = document.getElementById("previewTotal");
+      let total = 0;
+      let html = '';
+      pesanan.forEach((p, index) => {
+        const sub = p.harga * p.qty;
+        total += sub;
+        html += `<div class='cart-item'>
+                    <span>${p.qty}x ${p.nama} = Rp ${sub.toLocaleString("id-ID")}</span>
+                    <button class='secondary' onclick='hapusItem(${index})'>Hapus</button>
+                 </div>`;
+      });
+      if (pesanan.length > 0) {
+        html += `<div style='margin-top:0.5rem;'><strong>Total: Rp ${total.toLocaleString("id-ID")}</strong></div>`;
+      } else {
+        html = '<em>Belum ada pesanan.</em>';
+      }
+      container.innerHTML = html;
+    }
+
+    function checkoutWA() {
+      const name = document.getElementById("custName").value;
+      if (!name || pesanan.length === 0) return;
+
+      let pesan = `Halo Warkop Ngalor Ngidul,%0ASaya *${name}* ingin pesan:%0A`;
+      let total = 0;
+      pesanan.forEach(p => {
+        const sub = p.harga * p.qty;
+        total += sub;
+        pesan += `- ${p.qty}x ${p.nama} = Rp ${sub.toLocaleString("id-ID")}%0A`;
+      });
+      pesan += `Total: Rp ${total.toLocaleString("id-ID")}`;
+
+      const url = `https://wa.me/6281234567890?text=${encodeURIComponent(pesan)}`;
+      window.open(url, '_blank');
+    }
+  </script>
+
   <nav class="container-fluid">
     <ul>
       <li><strong>Warkop Ngalor Ngidul</strong></li>
     </ul>
     <ul>
       <li><a href="tentang.html">Tentang Kami</a></li>
+      <li><a href="#" role="button" onclick="toggleDarkMode()">Mode Gelap</a></li>
     </ul>
   </nav>
 
-  <!-- MAIN CONTENT -->
   <main class="container">
     <section>
       <hgroup>
-        <h2>Selamat Datang di Warkop Digital</h2>
-        <h3>Langsung pesan via WhatsApp tanpa ribet</h3>
+        <h2>Checkout Pesanan</h2>
+        <h3>Tambah item, edit, atau hapus sebelum checkout</h3>
       </hgroup>
 
-      <p>Silakan pilih menu favoritmu dan kirim pesanan langsung ke WhatsApp kami. Santai, cepat, dan praktis!</p>
-      <a href="https://wa.me/6281234567890" role="button">Pesan Sekarang</a>
+      <form class="grid" onsubmit="event.preventDefault(); addToCart();">
+        <input type="text" id="custName" placeholder="Nama Anda" required />
+        <select id="menuItem" required>
+          <option value="kopi">Kopi Tubruk</option>
+          <option value="roti">Roti Bakar</option>
+          <option value="mie">Mie Goreng</option>
+          <option value="teh">Es Teh Manis</option>
+          <option value="tempe">Tempe Goreng</option>
+          <option value="ayam">Ayam Geprek</option>
+        </select>
+        <input type="number" id="quantity" placeholder="Jumlah" min="1" required />
+        <button type="submit">Tambah ke Pesanan</button>
+      </form>
+
+      <div id="previewTotal"></div>
+      <br />
+      <button onclick="checkoutWA()">Checkout Sekarang ke WhatsApp</button>
     </section>
 
     <hr />
 
     <section>
-      <h3>Menu Warkop</h3>
+      <h3>Menu & Harga</h3>
       <table>
         <thead>
           <tr>
@@ -51,23 +162,18 @@
         </thead>
         <tbody>
           <tr><td>Kopi Tubruk</td><td>Rp 8.000</td></tr>
-          <tr><td>Roti Bakar Coklat Keju</td><td>Rp 12.000</td></tr>
-          <tr><td>Mie Goreng Pedas</td><td>Rp 10.000</td></tr>
+          <tr><td>Roti Bakar</td><td>Rp 12.000</td></tr>
+          <tr><td>Mie Goreng</td><td>Rp 10.000</td></tr>
           <tr><td>Es Teh Manis</td><td>Rp 5.000</td></tr>
-          <tr><td>Gorengan Campur (5 pcs)</td><td>Rp 7.000</td></tr>
-          <tr><td>Nasi Goreng Spesial</td><td>Rp 15.000</td></tr>
-          <tr><td>Ayam Geprek Level 5</td><td>Rp 18.000</td></tr>
-          <tr><td>Es Jeruk Segar</td><td>Rp 6.000</td></tr>
-          <tr><td>Susu Jahe Hangat</td><td>Rp 6.000</td></tr>
+          <tr><td>Tempe Goreng</td><td>Rp 7.000</td></tr>
+          <tr><td>Ayam Geprek</td><td>Rp 18.000</td></tr>
         </tbody>
       </table>
     </section>
   </main>
 
-  <!-- FOOTER -->
   <footer class="container">
     <small>© 2025 Warkop Ngalor Ngidul</small>
   </footer>
-
 </body>
 </html>
